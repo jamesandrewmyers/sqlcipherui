@@ -81,7 +81,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(dataflow.router, prefix="/api/dataflow", tags=["dataflow"])
 
     # Serve pre-built frontend if available
-    web_dist = Path(__file__).resolve().parent.parent.parent.parent / "web" / "dist"
+    import sys
+    if getattr(sys, "frozen", False):
+        web_dist = Path(sys._MEIPASS) / "web_dist"
+    else:
+        web_dist = Path(__file__).resolve().parent.parent.parent.parent / "web" / "dist"
     if web_dist.is_dir():
         from fastapi.responses import FileResponse
 
