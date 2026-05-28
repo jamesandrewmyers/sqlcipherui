@@ -63,23 +63,29 @@ echo "[2/5] Checking icon assets..."
 ICON_SRC="$PACKAGING_DIR/assets/icon.png"
 
 if [ -f "$ICON_SRC" ]; then
-    ICON_ICNS="$PACKAGING_DIR/assets/icon.icns"
-    if [ ! -f "$ICON_ICNS" ]; then
-        echo "       Generating .icns from icon.png..."
-        ICONSET_DIR=$(mktemp -d)/SQLCipherUI.iconset
-        mkdir -p "$ICONSET_DIR"
-        for size in 16 32 128 256 512; do
-            sips -z $size $size "$ICON_SRC" --out "$ICONSET_DIR/icon_${size}x${size}.png" >/dev/null 2>&1
-            double=$((size * 2))
-            sips -z $double $double "$ICON_SRC" --out "$ICONSET_DIR/icon_${size}x${size}@2x.png" >/dev/null 2>&1
-        done
-        iconutil -c icns "$ICONSET_DIR" -o "$ICON_ICNS"
-        rm -rf "$(dirname "$ICONSET_DIR")"
-    fi
-
-    if [ ! -f "$TAURI_DIR/icons/icon.icns" ]; then
-        echo "       Generating Tauri icons..."
-        cargo tauri icon "$ICON_SRC" 2>/dev/null || echo "       (cargo tauri icon not available, copy manually)"
+    if [ ! -f "$TAURI_DIR/icons/32x32.png" ] || [ ! -f "$TAURI_DIR/icons/icon.icns" ]; then
+        echo "       Generating icons from icon.png (RGBA)..."
+        python3 -c "
+from PIL import Image
+import subprocess, tempfile, os
+src = Image.open('$ICON_SRC').convert('RGBA')
+for size in [32, 128, 256]:
+    src.resize((size, size), Image.LANCZOS).save('$TAURI_DIR/icons/%dx%d.png' % (size, size))
+src.resize((256, 256), Image.LANCZOS).save('$TAURI_DIR/icons/128x128@2x.png')
+# Generate .icns
+iconset = tempfile.mkdtemp() + '/SQLCipherUI.iconset'
+os.makedirs(iconset)
+for size in [16, 32, 128, 256, 512]:
+    src.resize((size, size), Image.LANCZOS).save(os.path.join(iconset, 'icon_%dx%d.png' % (size, size)))
+    d = size * 2
+    src.resize((d, d), Image.LANCZOS).save(os.path.join(iconset, 'icon_%dx%d@2x.png' % (size, size)))
+subprocess.run(['iconutil', '-c', 'icns', iconset, '-o', '$TAURI_DIR/icons/icon.icns'], check=True)
+subprocess.run(['iconutil', '-c', 'icns', iconset, '-o', '$PACKAGING_DIR/assets/icon.icns'], check=True)
+# Generate .ico
+imgs = [src.resize((s, s), Image.LANCZOS) for s in [16, 32, 48, 256]]
+imgs[0].save('$TAURI_DIR/icons/icon.ico', format='ICO', sizes=[(16,16),(32,32),(48,48),(256,256)], append_images=imgs[1:])
+print('All icons generated (RGBA)')
+"
     fi
 else
     echo "       WARNING: No icon.png at $ICON_SRC — using defaults"

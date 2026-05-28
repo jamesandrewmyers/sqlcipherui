@@ -49,7 +49,7 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
-          pip install -e "packages/core" -e "packages/api" "pyinstaller>=6.12.0"
+          pip install -e "packages/core" -e "packages/api" "pyinstaller>=6.12.0" Pillow
 
       - name: Install frontend dependencies
         run: npm --prefix packages/web ci
