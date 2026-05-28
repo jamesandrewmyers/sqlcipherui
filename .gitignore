@@ -70,3 +70,13 @@ Thumbs.db
 # Runtime
 .run/
 logs/
+
+# Tauri
+src-tauri/target/
+src-tauri/binaries/
+
+# Packaging
+packaging/build/
+packaging/dist/
+packaging/.tiktoken_cache/
+releases/

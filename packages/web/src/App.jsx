@@ -129,7 +129,7 @@ export default function App() {
       ) : (
         <div className="body">
           <ActivityRail />
-          <Sidebar />
+          {activeView !== 'dashboard' && <Sidebar />}
           <div className="main">
             {showTabs && <TabBar />}
             <div className="content">{mainPanel}</div>

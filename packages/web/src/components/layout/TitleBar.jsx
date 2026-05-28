@@ -34,7 +34,7 @@ export function TitleBar({ onNeedUnlock, onDisconnect }) {
     <div className="titlebar">
       <div className="titlebar-left">
         <div className="brand">
-          <Icon name="shield" size={14} />
+          <img src="/logo.png" alt="" className="brand-logo" />
           <span>SQLCipherUI</span>
         </div>
         <div className="mode-switch">
