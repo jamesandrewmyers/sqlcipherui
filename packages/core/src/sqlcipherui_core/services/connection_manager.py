@@ -20,6 +20,18 @@ class ConnectionManager:
     def __init__(self):
         self._connections: dict[str, DatabaseManager] = {}
 
+    async def create(self, path: str, passphrase: str | None = None) -> tuple[str, DatabaseInfo]:
+        """Create a new database, returning (conn_id, info)."""
+        conn_id = str(Path(path).expanduser().resolve())
+
+        if conn_id in self._connections:
+            raise FileExistsError(f"Database already open: {conn_id}")
+
+        mgr = DatabaseManager()
+        info = await mgr.create(path, passphrase)
+        self._connections[conn_id] = mgr
+        return conn_id, info
+
     async def open(self, path: str) -> tuple[str, DatabaseInfo]:
         """Open a database, returning (conn_id, info).
 

@@ -52,6 +52,33 @@ class DatabaseManager:
             raise RuntimeError("No database connection open")
         return self._conn
 
+    async def create(self, path: str, passphrase: str | None = None) -> DatabaseInfo:
+        return await asyncio.to_thread(self._create_sync, path, passphrase)
+
+    def _create_sync(self, path: str, passphrase: str | None = None) -> DatabaseInfo:
+        with self._lock:
+            if self._conn is not None:
+                self._conn.close()
+                self._conn = None
+
+            db_path = Path(path).expanduser().resolve()
+            if db_path.exists():
+                raise FileExistsError(f"File already exists: {db_path}")
+            db_path.parent.mkdir(parents=True, exist_ok=True)
+
+            self._db_path = db_path
+            self._conn = sqlcipher3.connect(str(db_path), check_same_thread=False, isolation_level=None)
+
+            if passphrase:
+                self._conn.execute(self._key_pragma("PRAGMA key", passphrase))
+                self._is_encrypted = True
+            else:
+                self._is_encrypted = False
+
+            self._conn.execute("SELECT count(*) FROM sqlite_master")
+            self._is_unlocked = True
+            return self._build_info()
+
     async def open(self, path: str) -> DatabaseInfo:
         return await asyncio.to_thread(self._open_sync, path)
 

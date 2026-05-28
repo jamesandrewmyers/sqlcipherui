@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlcipherui_api.dependencies import ConnManagerDep
 from sqlcipherui_core.models.database import (
     CloseRequest,
+    CreateRequest,
     DatabaseInfo,
     OpenRequest,
     UnlockRequest,
@@ -55,6 +56,19 @@ async def browse_directory(path: str = Query(default="")):
         raise HTTPException(status_code=403, detail="Permission denied")
 
     return {"path": str(p), "parent": str(p.parent) if p != p.parent else None, "items": items}
+
+
+@router.post("/create")
+async def create_database(request: CreateRequest, cm: ConnManagerDep):
+    try:
+        conn_id, info = await cm.create(request.path, request.passphrase if request.encrypt else None)
+        result = info.model_dump()
+        result["id"] = conn_id
+        return result
+    except FileExistsError as e:
+        raise HTTPException(status_code=409, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/open")

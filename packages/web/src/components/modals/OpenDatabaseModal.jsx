@@ -10,7 +10,7 @@ function formatSize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function DatabaseDropdown({ onClose, onNeedUnlock }) {
+export function DatabaseDropdown({ onClose, onNeedUnlock, onCreateNew }) {
   const [view, setView] = useState('databases');
   const [databases, setDatabases] = useState([]);
   const [currentPath, setCurrentPath] = useState('');
@@ -111,6 +111,9 @@ export function DatabaseDropdown({ onClose, onNeedUnlock }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <Icon name="database" size={18} />
         <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, flex: 1 }}>Open database</h3>
+        <button className="btn btn-xs btn-primary" onClick={() => { onClose(); onCreateNew(); }} style={{ marginRight: 4 }}>
+          <Icon name="plus" size={10} /> New
+        </button>
         <div className="mode-switch">
           <button
             className={`mode-btn${view === 'databases' ? ' is-on' : ''}`}

@@ -6,7 +6,7 @@ import { DatabaseDropdown } from '../modals/OpenDatabaseModal';
 
 const cx = (...xs) => xs.filter(Boolean).join(' ');
 
-export function TitleBar({ onNeedUnlock, onDisconnect }) {
+export function TitleBar({ onNeedUnlock, onDisconnect, onCreateNew }) {
   const { mode, setMode, theme, setTheme } = useUiStore();
   const connections = useConnectionStore((s) => s.connections);
   const activeDbId = useConnectionStore((s) => s.activeDbId);
@@ -76,7 +76,7 @@ export function TitleBar({ onNeedUnlock, onDisconnect }) {
           </button>
         )}
         {showDropdown && (
-          <DatabaseDropdown onClose={closeDropdown} onNeedUnlock={(connId) => { closeDropdown(); onNeedUnlock(connId); }} />
+          <DatabaseDropdown onClose={closeDropdown} onNeedUnlock={(connId) => { closeDropdown(); onNeedUnlock(connId); }} onCreateNew={onCreateNew} />
         )}
       </div>
       <div className="titlebar-right">

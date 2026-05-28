@@ -31,6 +31,14 @@ class DatabaseInfo(BaseModel):
         return f"{self.size_bytes / (1024 * 1024):.1f} MB"
 
 
+class CreateRequest(BaseModel):
+    """Request to create a new database file."""
+
+    path: str
+    encrypt: bool = False
+    passphrase: str | None = None
+
+
 class OpenRequest(BaseModel):
     """Request to open a database file."""
 

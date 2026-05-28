@@ -9,6 +9,7 @@ import { Sidebar } from './components/layout/Sidebar';
 import { TabBar } from './components/layout/TabBar';
 import { StatusBar } from './components/layout/StatusBar';
 import { UnlockModal } from './components/modals/UnlockModal';
+import { CreateDatabaseModal } from './components/modals/CreateDatabaseModal';
 import { DashboardPanel } from './components/panels/DashboardPanel';
 import { DataPanel } from './components/panels/DataPanel';
 import { QueryPanel } from './components/panels/QueryPanel';
@@ -37,6 +38,7 @@ export default function App() {
   const isConnected = Object.keys(connections).length > 0;
 
   const [unlockConnId, setUnlockConnId] = useState(null);
+  const [showCreateDb, setShowCreateDb] = useState(false);
   const historyEntries = useHistoryStore((s) => s.entries);
   const addConnection = useConnectionStore((s) => s.addConnection);
 
@@ -121,7 +123,7 @@ export default function App() {
 
   return (
     <div className={cx('sqlui', mode === 'canvas' && 'cv', `sqlui-${theme.mode}`)} style={rootStyle}>
-      <TitleBar onNeedUnlock={handleNeedUnlock} onDisconnect={handleDisconnect} />
+      <TitleBar onNeedUnlock={handleNeedUnlock} onDisconnect={handleDisconnect} onCreateNew={() => setShowCreateDb(true)} />
       {mode === 'dataflows' ? (
         <DataFlowsMode />
       ) : mode === 'canvas' ? (
@@ -138,6 +140,7 @@ export default function App() {
         </div>
       )}
       {unlockConnId && <UnlockModal connId={unlockConnId} onClose={handleCloseUnlock} />}
+      {showCreateDb && <CreateDatabaseModal onClose={() => setShowCreateDb(false)} />}
     </div>
   );
 }
